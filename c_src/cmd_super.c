@@ -23,11 +23,14 @@
 #include "cmds.h"
 #include "cmd_super.h"
 #include "libbcachefs.h"
-#include "libbcachefs/opts.h"
-#include "libbcachefs/super-io.h"
-#include "libbcachefs/util.h"
 
-#include "libbcachefs/darray.h"
+#include "bcachefs.h"
+
+#include "sb/io.h"
+#include "sb/members.h"
+
+#include "util/util.h"
+#include "util/darray.h"
 
 #include "src/rust_to_c.h"
 
@@ -41,6 +44,7 @@ static void show_super_usage(void)
 	     "      --field-only=fiel)      print superblock section only, no header\n"
 	     "  -l, --layout                print superblock layout\n"
 	     "  -h, --help                  display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 	exit(EXIT_SUCCESS);
 }
@@ -58,6 +62,9 @@ static void print_one_member(struct printbuf *out, sb_names sb_names,
 			     struct bch_sb_field_disk_groups *gi,
 			     struct bch_member m, unsigned idx)
 {
+	if (!bch2_member_alive(&m))
+		return;
+
 	struct sb_name *name = sb_dev_to_name(sb_names, idx);
 	prt_printf(out, "Device %u:\t%s\t", idx, name ? name->name : "(not found)");
 
@@ -116,8 +123,8 @@ int cmd_show_super(int argc, char *argv[])
 	static const struct option longopts[] = {
 		{ "fields",			1, NULL, 'f' },
 		{ "field-only",			1, NULL, 'F' },
-		{ "layout",			0, NULL, 'l' },
-		{ "help",			0, NULL, 'h' },
+		{ "layout",			no_argument, NULL, 'l' },
+		{ "help",			no_argument, NULL, 'h' },
 		{ NULL }
 	};
 	unsigned fields = 0;
@@ -186,9 +193,6 @@ int cmd_show_super(int argc, char *argv[])
 	printbuf_exit(&buf);
 	return 0;
 }
-
-#include "libbcachefs/super-io.h"
-#include "libbcachefs/sb-members.h"
 
 typedef DARRAY(struct bch_sb *) probed_sb_list;
 
@@ -384,6 +388,7 @@ static void recover_super_usage(void)
 	     "  -y, --yes                   Recover without prompting\n"
 	     "  -v, --verbose               Increase logging level\n"
 	     "  -h, --help                  display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 	exit(EXIT_SUCCESS);
 }

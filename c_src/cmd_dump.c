@@ -8,15 +8,15 @@
 #include "libbcachefs.h"
 #include "qcow2.h"
 
-#include "libbcachefs/bcachefs.h"
-#include "libbcachefs/btree_cache.h"
-#include "libbcachefs/btree_io.h"
-#include "libbcachefs/btree_iter.h"
-#include "libbcachefs/error.h"
-#include "libbcachefs/extents.h"
-#include "libbcachefs/journal_io.h"
-#include "libbcachefs/sb-members.h"
-#include "libbcachefs/super.h"
+#include "bcachefs.h"
+#include "btree/cache.h"
+#include "btree/io.h"
+#include "btree/iter.h"
+#include "data/extents.h"
+#include "init/error.h"
+#include "init/fs.h"
+#include "journal/io.h"
+#include "sb/members.h"
 
 struct dump_dev {
 	ranges	sb, journal, btree;
@@ -313,13 +313,14 @@ static void dump_usage(void)
 	     "Usage: bcachefs dump [OPTION]... <devices>\n"
 	     "\n"
 	     "Options:\n"
-	     "  -o output       Output qcow2 image(s)\n"
-	     "  -f, --force     Force; overwrite when needed\n"
-	     "  -s, --sanitize  Zero out inline data extents\n"
-	     "      --nojournal Don't dump entire journal, just dirty entries\n"
-	     "      --noexcl    Open devices with O_NOEXCL (not recommended)\n"
+	     "  -o output                    Output qcow2 image(s)\n"
+	     "  -f, --force                  Force; overwrite when needed\n"
+	     "  -s, --sanitize               Zero out inline data extents\n"
+	     "      --nojournal              Don't dump entire journal, just dirty entries\n"
+	     "      --noexcl                 Open devices with O_NOEXCL (not recommended)\n"
 	     "  -v, --verbose\n"
-	     "  -h, --help      Display this help and exit\n"
+	     "  -h, --help                   Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
 
@@ -398,8 +399,9 @@ static void undump_usage(void)
 	     "Usage: bcachefs undump [OPTION]... <files>\n"
 	     "\n"
 	     "Options:\n"
-	     "  -f, --force     Force; overwrite when needed\n"
-	     "  -h, --help      Display this help and exit\n"
+	     "  -f, --force                  Force; overwrite when needed\n"
+	     "  -h, --help                   Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
 

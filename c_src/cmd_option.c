@@ -20,9 +20,11 @@
 
 #include "cmds.h"
 #include "libbcachefs.h"
-#include "libbcachefs/errcode.h"
-#include "libbcachefs/opts.h"
-#include "libbcachefs/super-io.h"
+
+#include "errcode.h"
+#include "opts.h"
+#include "init/fs.h"
+#include "sb/io.h"
 
 static void set_option_usage(void)
 {
@@ -33,6 +35,7 @@ static void set_option_usage(void)
 	bch2_opts_usage(OPT_MOUNT|OPT_RUNTIME);
 	puts("  -d, --dev-idx               index for device specific options\n"
 	     "  -h, --help                  display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 	exit(EXIT_SUCCESS);
 }
@@ -54,7 +57,7 @@ static int name_to_dev_idx(struct bch_fs *c, const char *dev)
 
 int cmd_set_option(int argc, char *argv[])
 {
-	struct bch_opt_strs new_opt_strs = bch2_cmdline_opts_get(&argc, argv, OPT_MOUNT|OPT_DEVICE);
+	struct bch_opt_strs new_opt_strs = bch2_cmdline_opts_get(&argc, argv, OPT_FS|OPT_DEVICE);
 	struct bch_opts new_opts = bch2_parse_opts(new_opt_strs);
 	DARRAY(unsigned) dev_idxs = {};
 	int opt, ret = 0;

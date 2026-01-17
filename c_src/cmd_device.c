@@ -14,16 +14,21 @@
 
 #include <blkid.h>
 
-#include "libbcachefs/bcachefs.h"
-#include "libbcachefs/bcachefs_ioctl.h"
-#include "libbcachefs/errcode.h"
-#include "libbcachefs/journal.h"
-#include "libbcachefs/sb-members.h"
-#include "libbcachefs/super-io.h"
 #include "cmds.h"
 #include "libbcachefs.h"
 #include "libbcachefs/opts.h"
 #include "tools-util.h"
+
+#include "bcachefs.h"
+#include "bcachefs_ioctl.h"
+
+#include "init/dev.h"
+#include "init/fs.h"
+
+#include "journal/init.h"
+
+#include "sb/members.h"
+#include "sb/io.h"
 
 static void device_add_usage(void)
 {
@@ -34,9 +39,9 @@ static void device_add_usage(void)
 
 	bch2_opts_usage(OPT_FORMAT|OPT_DEVICE);
 
-	puts("  -l, --label=label           Disk label\n"
-	     "  -f, --force                 Use device even if it appears to already be formatted\n"
-	     "  -h, --help                  Display this help and exit\n"
+	puts("  -l, --label=label            Disk label\n"
+	     "  -f, --force                  Use device even if it appears to already be formatted\n"
+	     "  -h, --help                   Display this help and exit\n"
 	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
@@ -135,11 +140,10 @@ static void device_remove_usage(void)
 	     "  bcachefs device remove <device>|<devid> <path>\n"
 	     "\n"
 	     "Options:\n"
-	     "  -f, --force		    Force removal, even if some data\n"
-	     "                              couldn't be migrated\n"
-	     "  -F, --force-metadata	    Force removal, even if some metadata\n"
-	     "                              couldn't be migrated\n"
-	     "  -h, --help                  display this help and exit\n"
+	     "  -f, --force                  Force removal, even if some data couldn't be migrated\n"
+	     "  -F, --force-metadata         Force removal, even if some metadata couldn't be migrated\n"
+	     "  -h, --help                   Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 	exit(EXIT_SUCCESS);
 }
@@ -147,10 +151,10 @@ static void device_remove_usage(void)
 static int cmd_device_remove(int argc, char *argv[])
 {
 	static const struct option longopts[] = {
-		{ "by-id",              0, NULL, 'i' },
-		{ "force",		0, NULL, 'f' },
-		{ "force-metadata",	0, NULL, 'F' },
-		{ "help",		0, NULL, 'h' },
+		{ "by-id",              no_argument, NULL, 'i' },
+		{ "force",		no_argument, NULL, 'f' },
+		{ "force-metadata",	no_argument, NULL, 'F' },
+		{ "help",		no_argument, NULL, 'h' },
 		{ NULL }
 	};
 	struct bchfs_handle fs;
@@ -205,7 +209,7 @@ static void device_online_usage(void)
 	     "Usage: bcachefs device online [OPTION]... device\n"
 	     "\n"
 	     "Options:\n"
-	     "  -h, --help                  Display this help and exit\n"
+	     "  -h, --help                   Display this help and exit\n"
 	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
@@ -213,7 +217,7 @@ static void device_online_usage(void)
 static int cmd_device_online(int argc, char *argv[])
 {
 	static const struct option longopts[] = {
-		{ "help",		0, NULL, 'h' },
+		{ "help",		no_argument, NULL, 'h' },
 		{ NULL }
 	};
 	int opt;
@@ -245,8 +249,8 @@ static void device_offline_usage(void)
 	     "Usage: bcachefs device offline [OPTION]... device\n"
 	     "\n"
 	     "Options:\n"
-	     "  -f, --force		    Force, if data redundancy will be degraded\n"
-	     "  -h, --help                  Display this help and exit\n"
+	     "  -f, --force                  Force, if data redundancy will be degraded\n"
+	     "  -h, --help                   Display this help and exit\n"
 	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
@@ -254,7 +258,8 @@ static void device_offline_usage(void)
 static int cmd_device_offline(int argc, char *argv[])
 {
 	static const struct option longopts[] = {
-		{ "force",		0, NULL, 'f' },
+		{ "force",		no_argument, NULL, 'f' },
+		{ "help",		no_argument, NULL, 'h' },
 		{ NULL }
 	};
 	int opt, flags = 0;
@@ -290,8 +295,8 @@ static void device_evacuate_usage(void)
 	     "Usage: bcachefs device evacuate [OPTION]... device\n"
 	     "\n"
 	     "Options:\n"
-	     "  -f, --force		    Force if data redundancy will be degraded\n"
-	     "  -h, --help                  Display this help and exit\n"
+	     "  -f, --force                  Force if data redundancy will be degraded\n"
+	     "  -h, --help                   Display this help and exit\n"
 	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
@@ -354,10 +359,11 @@ static void device_set_state_usage(void)
 	     "<path>: path to mounted filesystem, optional unless specifying device by id\n"
 	     "\n"
 	     "Options:\n"
-	     "  -f, --force		    Force if data redundancy will be degraded\n"
-	     "      --force-if-data-lost    Force if data will be lost\n"
-	     "  -o, --offline               Set state of an offline device\n"
-	     "  -h, --help                  display this help and exit\n"
+	     "  -f, --force                  Force if data redundancy will be degraded\n"
+	     "      --force-if-data-lost     Force if data will be lost\n"
+	     "  -o, --offline                Set state of an offline device\n"
+	     "  -h, --help                   Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 	exit(EXIT_SUCCESS);
 }
@@ -461,7 +467,8 @@ static void device_resize_usage(void)
 	     "Usage: bcachefs device resize device [ size ]\n"
 	     "\n"
 	     "Options:\n"
-	     "  -h, --help                  display this help and exit\n"
+	     "  -h, --help                   Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 	exit(EXIT_SUCCESS);
 }
@@ -469,7 +476,7 @@ static void device_resize_usage(void)
 static int cmd_device_resize(int argc, char *argv[])
 {
 	static const struct option longopts[] = {
-		{ "help",			0, NULL, 'h' },
+		{ "help",			no_argument, NULL, 'h' },
 		{ NULL }
 	};
 	u64 size;
@@ -568,7 +575,8 @@ static void device_resize_journal_usage(void)
 	     "Usage: bcachefs device resize-journal device size\n"
 	     "\n"
 	     "Options:\n"
-	     "  -h, --help                  display this help and exit\n"
+	     "  -h, --help                   Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 	exit(EXIT_SUCCESS);
 }
@@ -576,7 +584,7 @@ static void device_resize_journal_usage(void)
 static int cmd_device_resize_journal(int argc, char *argv[])
 {
 	static const struct option longopts[] = {
-		{ "help",			0, NULL, 'h' },
+		{ "help",			no_argument, NULL, 'h' },
 		{ NULL }
 	};
 	u64 size;
@@ -666,14 +674,14 @@ static int device_usage(void)
             "Usage: bcachefs device <CMD> [OPTION]\n"
             "\n"
             "Commands:\n"
-            "  add                     add a new device to an existing filesystem\n"
-            "  remove                  remove a device from an existing filesystem\n"
-            "  online                  re-add an existing member to a filesystem\n"
-            "  offline                 take a device offline, without removing it\n"
-            "  evacuate                migrate data off a specific device\n"
-            "  set-state               mark a device as failed\n"
-            "  resize                  resize filesystem on a device\n"
-            "  resize-journal          resize journal on a device\n"
+            "  add                          Add a new device to an existing filesystem\n"
+            "  remove                       Remove a device from an existing filesystem\n"
+            "  online                       Re-add an existing member to a filesystem\n"
+            "  offline                      Take a device offline, without removing it\n"
+            "  evacuate                     Migrate data off a specific device\n"
+            "  set-state                    Mark a device as failed\n"
+            "  resize                       Resize filesystem on a device\n"
+            "  resize-journal               Resize journal on a device\n"
             "\n"
             "Report bugs to <linux-bcachefs@vger.kernel.org>");
        return 0;

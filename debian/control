@@ -4,17 +4,21 @@ Section: utils
 Priority: optional
 Standards-Version: 4.7.0
 Build-Depends: debhelper-compat (= 13),
-               cargo,
+               cargo:native,
+               dh-cargo,
                dh-dkms,
+               gcc:native,
                jq,
                libaio-dev,
                libblkid-dev,
-               libclang-dev,
+               libclang-dev:native,
                libfuse3-dev,
                libkeyutils-dev,
                liblz4-dev,
                libscrypt-dev,
                libsodium-dev,
+               libstd-rust-dev,
+               libstd-rust-dev:native,
                libudev-dev,
                liburcu-dev (>= 0.15),
                libzstd-dev,
@@ -22,7 +26,7 @@ Build-Depends: debhelper-compat (= 13),
                pkgconf,
                python3-docutils,
                python3:native,
-               rustc (>= 1.77),
+               rustc:native (>= 1.77),
                systemd-dev,
                uuid-dev,
                zlib1g-dev,
@@ -39,6 +43,10 @@ Recommends: bcachefs-kernel-dkms (= ${binary:Version}),
             initramfs-tools | linux-initramfs-tool,
 Breaks: bcachefs-kernel-dkms (<< ${binary:Version}),
         bcachefs-kernel-dkms (>> ${binary:Version}),
+Replaces: bcachefs-kernel-dkms (<< ${binary:Version}),
+          bcachefs-kernel-dkms (>> ${binary:Version}),
+Built-Using: ${cargo:Built-Using}
+Static-Built-Using: ${cargo:Static-Built-Using}
 Description: bcachefs userspace tools
  Userspace tools for bcachefs, a modern copy on write, checksumming, multi
  device filesystem.
@@ -52,9 +60,10 @@ Architecture: linux-any
 Section: kernel
 Depends: ${misc:Depends},
 	 initramfs-tools | linux-initramfs-tool,
-	 linux-headers-generic (>= 6.16) |
+	 linux-headers-generic (>= 6.16) | pve-headers (>= 6.16) [amd64] |
 	 linux-headers-amd64 (>= 6.16) [amd64] | linux-headers-cloud-amd64 (>= 6.16) [amd64] | linux-headers-rt-amd64 (>= 6.16) [amd64] |
-	 linux-headers-arm64 (>= 6.16) [arm64] | linux-headers-cloud-arm64 (>= 6.16) [arm64] | linux-headers-rt-arm64 (>= 6.16) [arm64]
+	 linux-headers-arm64 (>= 6.16) [arm64] | linux-headers-cloud-arm64 (>= 6.16) [arm64] | linux-headers-rt-arm64 (>= 6.16) [arm64] |
+	 linux-headers-ppc64el (>= 6.16) [ppc64el] | linux-headers-cloud-ppc64el (>= 6.16) [ppc64el] | linux-headers-rt-ppc64el (>= 6.16) [ppc64el]
 Pre-Depends: bcachefs-tools (= ${binary:Version}),
 Provides: bcachefs-kernel
 Description: bcachefs kernel module DKMS source
