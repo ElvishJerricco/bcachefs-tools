@@ -24,19 +24,27 @@
 #include "posix_to_bcachefs.h"
 #include "libbcachefs.h"
 #include "crypto.h"
-#include "libbcachefs/alloc_background.h"
-#include "libbcachefs/alloc_foreground.h"
-#include "libbcachefs/btree_update.h"
-#include "libbcachefs/data_update.h"
-#include "libbcachefs/disk_accounting.h"
-#include "libbcachefs/errcode.h"
-#include "libbcachefs/journal_reclaim.h"
-#include "libbcachefs/move.h"
-#include "libbcachefs/opts.h"
-#include "libbcachefs/super-io.h"
-#include "libbcachefs/util.h"
 
-#include "libbcachefs/darray.h"
+#include "bcachefs.h"
+
+#include "alloc/accounting.h"
+#include "alloc/background.h"
+#include "alloc/foreground.h"
+
+#include "btree/update.h"
+
+#include "data/move.h"
+#include "data/update.h"
+
+#include "init/dev.h"
+#include "init/fs.h"
+
+#include "journal/reclaim.h"
+
+#include "sb/io.h"
+
+#include "util/util.h"
+#include "util/darray.h"
 
 static u64 count_input_size(int dirfd)
 {
@@ -495,20 +503,20 @@ static void image_create_usage(void)
 	     "Usage: bcachefs image create [OPTION]... <file>\n"
 	     "\n"
 	     "Options:\n"
-	     "      --source=path           Source directory to be used as content for the new image\n"
-	     "  -a, --keep-alloc            Include allocation info in the filesystem\n"
-	     "                              6.16+ regenerates alloc info on first rw mount\n"
-	     "      --encrypted             Enable whole filesystem encryption (chacha20/poly1305)\n"
+	     "      --source=path            Source directory to be used as content for the new image\n"
+	     "  -a, --keep-alloc             Include allocation info in the filesystem\n"
+	     "                               6.16+ regenerates alloc info on first rw mount\n"
+	     "      --encrypted              Enable whole filesystem encryption (chacha20/poly1305)\n"
 	     "  -L, --fs_label=label\n"
 	     "  -U, --uuid=uuid\n"
 	     "      --superblock_size=size\n"
 	     "      --bucket_size=size\n"
-	     "      --fs_size=size          Expected size of device image will be used on, hint for bucket size\n"
-	     "      --version=version       Create filesystem with specified on disk format version instead of the latest\n"
+	     "      --fs_size=size           Expected size of device image will be used on, hint for bucket size\n"
+	     "      --version=version        Create filesystem with specified on disk format version instead of the latest\n"
 	     "  -f, --force\n"
-	     "  -q, --quiet                 Only print errors\n"
-	     "  -v, --verbose               Verbose filesystem initialization\n"
-	     "  -h, --help                  Display this help and exit\n"
+	     "  -q, --quiet                  Only print errors\n"
+	     "  -v, --verbose                Verbose filesystem initialization\n"
+	     "  -h, --help                   Display this help and exit\n"
 	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
@@ -738,12 +746,12 @@ static void image_update_usage(void)
 	     "Usage: bcachefs image update [OPTION]... <file>\n"
 	     "\n"
 	     "Options:\n"
-	     "      --source=path           Source directory to be used as content for the new image\n"
-	     "  -a, --keep-alloc            Include allocation info in the filesystem\n"
-	     "                              6.16+ regenerates alloc info on first rw mount\n"
-	     "  -q, --quiet                 Only print errors\n"
-	     "  -v, --verbose               Verbose filesystem initialization\n"
-	     "  -h, --help                  Display this help and exit\n"
+	     "      --source=path            Source directory to be used as content for the new image\n"
+	     "  -a, --keep-alloc             Include allocation info in the filesystem\n"
+	     "                               6.16+ regenerates alloc info on first rw mount\n"
+	     "  -q, --quiet                  Only print errors\n"
+	     "  -v, --verbose                Verbose filesystem initialization\n"
+	     "  -h, --help                   Display this help and exit\n"
 	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
@@ -801,8 +809,8 @@ static int image_usage(void)
 	     "Usage: bcachefs image <CMD> [OPTION]...\n"
             "\n"
             "Commands:\n"
-            "  create                  Create a minimally-sized disk image\n"
-	    "  update                  Update a disk image, minimizing changes\n"
+            "  create                       Create a minimally-sized disk image\n"
+            "  update                       Update a disk image, minimizing changes\n"
             "\n"
             "Report bugs to <linux-bcachefs@vger.kernel.org>");
 	return 0;

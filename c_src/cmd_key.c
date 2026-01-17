@@ -5,10 +5,12 @@
 #include <uuid/uuid.h>
 
 #include "cmds.h"
-#include "libbcachefs/checksum.h"
 #include "crypto.h"
 #include "libbcachefs.h"
 #include "tools-util.h"
+
+#include "data/checksum.h"
+#include "init/fs.h"
 
 static void unlock_usage(void)
 {
@@ -21,6 +23,7 @@ static void unlock_usage(void)
 	     "                         Keyring to add to (default: user)\n"
 	     "  -f, --file             Passphrase file to read from (disables passphrase prompt)\n"
 	     "  -h, --help             Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
 
@@ -101,6 +104,7 @@ static void set_passphrase_usage(void)
 	     "\n"
 	     "Options:\n"
 	     "  -h, --help             Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
 
@@ -166,6 +170,7 @@ static void remove_passphrase_usage(void)
 	     "\n"
 	     "Options:\n"
 	     "  -h, --help             Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
 

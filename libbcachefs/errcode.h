@@ -153,6 +153,7 @@
 	x(BCH_ERR_transaction_restart,	transaction_restart_upgrade)		\
 	x(BCH_ERR_transaction_restart,	transaction_restart_key_cache_fill)	\
 	x(BCH_ERR_transaction_restart,	transaction_restart_key_cache_raced)	\
+	x(BCH_ERR_transaction_restart,	transaction_restart_lock_root_race)	\
 	x(BCH_ERR_transaction_restart,	transaction_restart_split_race)		\
 	x(BCH_ERR_transaction_restart,	transaction_restart_write_buffer_flush)	\
 	x(BCH_ERR_transaction_restart,	transaction_restart_nested)		\
@@ -188,6 +189,11 @@
 	x(BCH_ERR_recovery_will_run,	recovery_pass_will_run)			\
 	x(0,				data_update_done)			\
 	x(0,				bkey_was_deleted)			\
+	x(0,				bucket_not_moveable)			\
+	x(BCH_ERR_bucket_not_moveable,	bucket_not_moveable_dev_not_rw)		\
+	x(BCH_ERR_bucket_not_moveable,	bucket_not_moveable_bucket_open)	\
+	x(BCH_ERR_bucket_not_moveable,	bucket_not_moveable_bp_mismatch)	\
+	x(BCH_ERR_bucket_not_moveable,	bucket_not_moveable_lru_race)		\
 	x(BCH_ERR_data_update_done,	data_update_done_would_block)		\
 	x(BCH_ERR_data_update_done,	data_update_done_unwritten)		\
 	x(BCH_ERR_data_update_done,	data_update_done_no_writes_needed)	\
@@ -223,6 +229,7 @@
 	x(BCH_ERR_topology_repair,	topology_repair_drop_this_node)		\
 	x(BCH_ERR_topology_repair,	topology_repair_drop_prev_node)		\
 	x(BCH_ERR_topology_repair,	topology_repair_did_fill_from_scan)	\
+	x(EMLINK,			too_many_links)				\
 	x(EOPNOTSUPP,			may_not_use_incompat_feature)		\
 	x(EOPNOTSUPP,			no_casefolding_without_utf8)		\
 	x(EOPNOTSUPP,			casefolding_disabled)			\
@@ -362,7 +369,10 @@
 	x(BCH_ERR_nopromote,		nopromote_enomem)			\
 	x(0,				invalid_snapshot_node)			\
 	x(0,				option_needs_open_fs)			\
-	x(0,				remove_disk_accounting_entry)
+	x(0,				remove_disk_accounting_entry)		\
+	x(0,				nocow_trylock_fail)			\
+	x(BCH_ERR_nocow_trylock_fail,	nocow_trylock_contended)		\
+	x(BCH_ERR_nocow_trylock_fail,	nocow_trylock_bucket_full)		\
 
 enum bch_errcode {
 	BCH_ERR_START		= 2048,

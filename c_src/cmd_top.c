@@ -7,7 +7,8 @@
 
 #include "cmds.h"
 #include "libbcachefs.h"
-#include "libbcachefs/sb-counters.h"
+
+#include "sb/counters.h"
 
 static const u8 counters_to_stable_map[] = {
 #define x(n, id, ...)	[BCH_COUNTER_##n] = BCH_COUNTER_STABLE_##n,
@@ -75,8 +76,9 @@ static void fs_top_usage(void)
 	     "Usage: bcachefs fs top [OPTION]... <mountpoint>\n"
 	     "\n"
 	     "Options:\n"
-	     "  -h, --human-readable              Human readable units\n"
-	     "  -H, --help                        Display this help and exit\n"
+	     "  -h, --human-readable         Human readable units\n"
+	     "  -H, --help                   Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
 

@@ -4,15 +4,21 @@
 #include <linux/fs_parser.h>
 
 #include "bcachefs.h"
-#include "compress.h"
-#include "disk_groups.h"
-#include "error.h"
-#include "movinggc.h"
 #include "opts.h"
-#include "rebalance.h"
-#include "recovery_passes.h"
-#include "super-io.h"
-#include "util.h"
+
+#include "alloc/disk_groups.h"
+
+#include "data/compress.h"
+#include "data/copygc.h"
+#include "data/rebalance.h"
+
+#include "init/dev.h"
+#include "init/error.h"
+#include "init/passes.h"
+
+#include "sb/io.h"
+
+#include "util/util.h"
 
 #define x(t, n, ...) [n] = #t,
 
@@ -646,11 +652,8 @@ int bch2_parse_one_mount_opt(struct bch_fs *c, struct bch_opts *opts,
 
 	val = bch2_opt_val_synonym_lookup(name, val);
 
-	if (!(bch2_opt_table[id].flags & OPT_MOUNT))
-		return -BCH_ERR_option_name;
-
-	if (id == Opt_acl &&
-	    !IS_ENABLED(CONFIG_BCACHEFS_POSIX_ACL))
+	if (!(bch2_opt_table[id].flags & OPT_MOUNT) &&
+	    !(bch2_opt_table[id].flags & OPT_MOUNT_OLD))
 		return -BCH_ERR_option_name;
 
 	if ((id == Opt_usrquota ||
@@ -672,6 +675,12 @@ int bch2_parse_one_mount_opt(struct bch_fs *c, struct bch_opts *opts,
 
 	if (ret < 0)
 		return -BCH_ERR_option_value;
+
+	if (bch2_opt_table[id].flags & OPT_MOUNT_OLD) {
+		pr_err("option %s may no longer be specified at mount time; set via sysfs opts dir",
+		       bch2_opt_table[id].attr.name);
+		return 0;
+	}
 
 	if (opts)
 		bch2_opt_set_by_id(opts, id, v);

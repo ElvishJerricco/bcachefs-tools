@@ -34,6 +34,7 @@ fn main() {
                 .map(|p| format!("-I{}", p.display())),
         )
         .clang_arg("-I..")
+        .clang_arg("-I../libbcachefs")
         .clang_arg("-I../c_src")
         .clang_arg("-I../include")
         .clang_arg("-DZSTD_STATIC_LINKING_ONLY")
@@ -53,7 +54,7 @@ fn main() {
         .allowlist_function("cmd_.*")
         .allowlist_function(".*_cmds")
         .allowlist_function(".*bch2_.*")
-        .allowlist_function("bcache_fs_open")
+        .allowlist_function("bcache_fs_open_fallible")
         .allowlist_function("bcache_fs_close")
         .allowlist_function("bio_.*")
         .allowlist_function("derive_passphrase")

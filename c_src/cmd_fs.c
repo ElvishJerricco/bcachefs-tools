@@ -7,16 +7,15 @@
 #include "linux/sort.h"
 #include "linux/rcupdate.h"
 
-#include "libbcachefs/bcachefs_ioctl.h"
-#include "libbcachefs/buckets.h"
-#include "libbcachefs/disk_accounting.h"
-#include "libbcachefs/opts.h"
-#include "libbcachefs/super-io.h"
+#include "bcachefs_ioctl.h"
+#include "opts.h"
+#include "alloc/buckets.h"
+#include "alloc/accounting.h"
+#include "sb/io.h"
+#include "util/darray.h"
 
 #include "cmds.h"
 #include "libbcachefs.h"
-
-#include "libbcachefs/darray.h"
 
 #define FS_USAGE_FIELDS()		\
 	x(replicas)			\
@@ -598,11 +597,12 @@ static void fs_usage_usage(void)
 	     "Usage: bcachefs fs usage [OPTION]... <mountpoint>\n"
 	     "\n"
 	     "Options:\n"
-	     "  -f, --fields=FIELDS               List of accounting sections to print\n"
-	     "                                    replicas,btree,compression,rebalance_work,devices\n"
-	     "  -a                                Print all accounting fields\n"
-	     "  -h, --human-readable              Human readable units\n"
-	     "  -H, --help                        Display this help and exit\n"
+	     "  -f, --fields=FIELDS          List of accounting sections to print:\n"
+	     "                                 replicas, btree, compression, rebalance_work, devices\n"
+	     "  -a                           Print all accounting fields\n"
+	     "  -h, --human-readable         Human readable units\n"
+	     "  -H, --help                   Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
 
@@ -665,8 +665,8 @@ int fs_usage(void)
 	     "Usage: bcachefs fs <CMD> [OPTIONS]\n"
 	     "\n"
 	     "Commands:\n"
-	     "  usage                   Display detailed filesystem usage\n"
-	     "  top                     Show runtime performance information\n"
+	     "  usage                        Display detailed filesystem usage\n"
+	     "  top                          Show runtime performance information\n"
 	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 	return 0;

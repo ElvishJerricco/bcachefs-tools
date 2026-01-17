@@ -22,14 +22,14 @@
 
 #include <linux/dcache.h>
 #include <linux/generic-radix-tree.h>
-#include "libbcachefs/bcachefs.h"
-#include "libbcachefs/btree_update.h"
-#include "libbcachefs/buckets.h"
-#include "libbcachefs/dirent.h"
-#include "libbcachefs/errcode.h"
-#include "libbcachefs/inode.h"
-#include "libbcachefs/replicas.h"
-#include "libbcachefs/super.h"
+
+#include "bcachefs.h"
+#include "alloc/buckets.h"
+#include "alloc/replicas.h"
+#include "btree/update.h"
+#include "fs/dirent.h"
+#include "fs/inode.h"
+#include "init/fs.h"
 
 static char *dev_t_to_path(dev_t dev)
 {
@@ -188,17 +188,19 @@ static void migrate_usage(void)
 	     "Usage: bcachefs migrate [OPTION]...\n"
 	     "\n"
 	     "Options:\n"
-	     "  -f fs                  Root of filesystem to migrate(s)\n"
-	     "      --encrypted        Enable whole filesystem encryption (chacha20/poly1305)\n"
-	     "      --no_passphrase    Don't encrypt master encryption key\n"
-	     "  -F                     Force, even if metadata file already exists\n"
-	     "  -h                     Display this help and exit\n"
+	     "  -f fs                        Root of filesystem to migrate(s)\n"
+	     "      --encrypted              Enable whole filesystem encryption (chacha20/poly1305)\n"
+	     "      --no_passphrase          Don't encrypt master encryption key\n"
+	     "  -F                           Force, even if metadata file already exists\n"
+	     "  -h, --help                   Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
 
 static const struct option migrate_opts[] = {
 	{ "encrypted",		no_argument, NULL, 'e' },
 	{ "no_passphrase",	no_argument, NULL, 'p' },
+	{ "help",		no_argument, NULL, 'h' },
 	{ NULL }
 };
 
@@ -383,9 +385,10 @@ static void migrate_superblock_usage(void)
 	     "Usage: bcachefs migrate-superblock [OPTION]...\n"
 	     "\n"
 	     "Options:\n"
-	     "  -d, --dev    device     Device to create superblock for\n"
-	     "  -o, --offset offset     Offset of existing superblock\n"
-	     "  -h, --help              Display this help and exit\n"
+	     "  -d, --dev    device          Device to create superblock for\n"
+	     "  -o, --offset offset          Offset of existing superblock\n"
+	     "  -h, --help                   Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
 

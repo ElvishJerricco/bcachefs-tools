@@ -8,12 +8,11 @@
 #include "libbcachefs.h"
 #include "tools-util.h"
 
-#include "libbcachefs/bcachefs.h"
-#include "libbcachefs/btree_iter.h"
-#include "libbcachefs/errcode.h"
-#include "libbcachefs/error.h"
-#include "libbcachefs/sb-members.h"
-#include "libbcachefs/super.h"
+#include "bcachefs.h"
+#include "btree/iter.h"
+#include "init/error.h"
+#include "init/fs.h"
+#include "sb/members.h"
 
 static void kill_btree_node_usage(void)
 {
@@ -21,9 +20,10 @@ static void kill_btree_node_usage(void)
 	     "Usage: bcachefs kill_btree_node [OPTION]... <devices>\n"
 	     "\n"
 	     "Options:\n"
-	     "  -n, --node btree:level:idx            Node to kill\n"
-	     "  -d, --dev  dev                        Device index (default: kill all replicas)\n"
-	     "  -h                                    Display this help and exit\n"
+	     "  -n, --node btree:level:idx   Node to kill\n"
+	     "  -d, --dev  dev               Device index (default: kill all replicas)\n"
+	     "  -h, --help                   Display this help and exit\n"
+	     "\n"
 	     "Report bugs to <linux-bcachefs@vger.kernel.org>");
 }
 
